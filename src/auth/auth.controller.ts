@@ -1,8 +1,16 @@
-import { Controller, Post, Request, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { LocalAuthGuard } from './local-auth.guard';
 import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
+import { SignupDto } from './dto/signup.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -17,6 +25,17 @@ export class AuthController {
     const accessToken = await this.authService.login(
       req.user as Omit<User, 'password'>,
     );
+    response.cookie('token', accessToken, { httpOnly: true });
+    return;
+  }
+
+  @Post('signup')
+  async signup(
+    @Body() signupDto: SignupDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const accessToken = await this.authService.signup(signupDto);
+
     response.cookie('token', accessToken, { httpOnly: true });
     return;
   }

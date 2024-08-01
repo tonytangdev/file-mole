@@ -11,6 +11,7 @@ import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { SignupDto } from './dto/signup.dto';
+import { JwtAuthGuard } from './jwt-auth-guard';
 
 @Controller('auth')
 export class AuthController {
@@ -37,6 +38,13 @@ export class AuthController {
     const accessToken = await this.authService.signup(signupDto);
 
     response.cookie('token', accessToken, { httpOnly: true });
+    return;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('token');
     return;
   }
 }
